@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUSIC MAN BY ZZZ — MUSIC RANDOMIZER</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --black:#07020c;--deep:#0a040f;--surface:#100714;--border:#331a66;
+  --green:#bf80ff;--green2:#9933ff;--green3:#bf80ff80;
+  --dim:#7a3dbf;--muted:#4d2a6b;--text:#e8ccff;--white:#f5eeff;
+  --scan-h:64px;--win-h:256px;--pad:2;
+  --glow:0 0 12px #bf80ff55,0 0 30px #bf80ff22;
+  --glow-strong:0 0 8px #bf80ff,0 0 25px #bf80ff88,0 0 60px #bf80ff33;
+  --accept:#00ff88;--accept2:#00cc6a;--accept-glow:0 0 8px #00ff88,0 0 25px #00ff8888,0 0 60px #00ff8833;
+  --deny:#ff3366;--deny2:#cc1144;--deny-glow:0 0 8px #ff3366,0 0 25px #ff336688,0 0 60px #ff336633;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:'Share Tech Mono',monospace;min-height:100vh;overflow-x:hidden;cursor:crosshair}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(191,128,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(191,128,255,.04) 1px,transparent 1px);background-size:40px 40px;pointer-events:none}
+body::after{content:'';position:fixed;inset:0;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);pointer-events:none}
+.corner{position:fixed;width:60px;height:60px;z-index:10;pointer-events:none}
+.corner::before,.corner::after{content:'';position:absolute;background:var(--green);box-shadow:var(--glow)}
+.corner::before{width:2px;height:30px}.corner::after{width:30px;height:2px}
+.corner.tl{top:16px;left:16px}.corner.tl::before{top:0;left:0}.corner.tl::after{top:0;left:0}
+.corner.tr{top:16px;right:16px}.corner.tr::before{top:0;right:0}.corner.tr::after{top:0;right:0}
+.corner.bl{bottom:16px;left:16px}.corner.bl::before{bottom:0;left:0}.corner.bl::after{bottom:0;left:0}
+.corner.br{bottom:16px;right:16px}.corner.br::before{bottom:0;right:0}.corner.br::after{bottom:0;right:0}
+.page{position:relative;z-index:1;max-width:960px;margin:0 auto;padding:0 1.5rem 5rem}
+
+/* HEADER */
+header{padding:3rem 0 2rem}
+.header-bar{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem}
+.brand-label{font-size:.55rem;letter-spacing:.5em;color:var(--dim);text-transform:uppercase;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
+.brand-label::before{content:'';display:inline-block;width:20px;height:1px;background:var(--green);box-shadow:var(--glow)}
+.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.6rem,4.5vw,3rem);line-height:.85;color:var(--green);text-shadow:var(--glow-strong);letter-spacing:-.02em;position:relative}
+.logo-sub{font-size:.6rem;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;margin-top:.5rem}
+.header-status{text-align:right;font-size:.55rem;letter-spacing:.15em;color:var(--dim);line-height:2;padding-top:.5rem}
+.status-live{display:inline-flex;align-items:center;gap:6px;font-size:.6rem;color:var(--green)}
+.status-live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.glitch{position:relative}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;top:0;left:0;width:100%;font-family:'Orbitron',sans-serif;font-weight:900;font-size:inherit;line-height:inherit;letter-spacing:inherit}
+.glitch::before{color:#cc99ff;animation:glitch1 4s infinite linear;clip-path:polygon(0 20%,100% 20%,100% 40%,0 40%);opacity:0}
+.glitch::after{color:#ff66cc;animation:glitch2 4s infinite linear;clip-path:polygon(0 60%,100% 60%,100% 80%,0 80%);opacity:0}
+@keyframes glitch1{0%,89%,91%,100%{opacity:0;transform:translateX(0)}90%{opacity:.8;transform:translateX(-4px)}}
+@keyframes glitch2{0%,92%,94%,100%{opacity:0;transform:translateX(0)}93%{opacity:.8;transform:translateX(4px)}}
+.cyber-divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0}
+.cyber-divider::before,.cyber-divider::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border),var(--green),var(--border),transparent)}
+.divider-diamond{width:8px;height:8px;background:var(--green);transform:rotate(45deg);box-shadow:var(--glow);flex-shrink:0}
+
+/* MACHINE */
+@keyframes bootUp{from{opacity:0;transform:translateY(20px);filter:blur(4px)}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes flashBorder{0%,100%{box-shadow:0 0 40px rgba(191,128,255,.06)}50%{box-shadow:0 0 60px rgba(191,128,255,.3),0 0 120px rgba(191,128,255,.1)}}
+.machine{border:1px solid var(--border);background:var(--surface);position:relative;overflow:hidden;box-shadow:0 0 40px rgba(191,128,255,.06);animation:bootUp .6s ease both .2s}
+.machine::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);box-shadow:0 0 10px var(--green)}
+.machine.spinning{animation:flashBorder .4s ease-in-out infinite}
+.machine-header{padding:.75rem 1.5rem;background:var(--deep);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.mh-left{font-size:.55rem;letter-spacing:.3em;color:var(--dim);display:flex;align-items:center;gap:.75rem}
+.mh-left span{color:var(--green)}
+.mh-right{display:flex;gap:1rem;font-size:.5rem;color:var(--muted);letter-spacing:.2em}
+
+/* SLOTS */
+.slots-grid{display:grid;grid-template-columns:1fr 1fr 1fr;position:relative}
+
+.slots-highlight{
+position:absolute;left:0;right:0;
+top:129px;
+height:var(--scan-h);
+pointer-events:none;z-index:10;
+background:rgba(191,128,255,.08);
+border-top:1px solid rgba(191,128,255,.7);
+border-bottom:1px solid rgba(191,128,255,.7);
+box-shadow:0 0 28px rgba(191,128,255,.18),inset 0 0 40px rgba(191,128,255,.07);
+}
+.slots-highlight::after{
+content:'';position:absolute;left:0;right:0;height:2px;
+background:linear-gradient(90deg,transparent,var(--green),transparent);
+box-shadow:0 0 10px var(--green);opacity:.75;
+animation:scanSweep 2s ease-in-out infinite;
+}
+@keyframes scanSweep{0%{top:0;opacity:.85}50%{top:calc(var(--scan-h) - 2px);opacity:.3}100%{top:0;opacity:.85}}
+.slots-highlight::before{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(191,128,255,.1) 0%,transparent 5%),linear-gradient(to left,rgba(191,128,255,.1) 0%,transparent 5%)}
+
+.slot-col{border-right:1px solid var(--border);position:relative;overflow:hidden}
+.slot-col:last-child{border-right:none}
+.slot-header{height:33px;padding:.5rem 1rem;background:var(--deep);border-bottom:1px solid var(--border);font-size:.5rem;letter-spacing:.4em;color:var(--green);text-transform:uppercase;text-align:center;text-shadow:0 0 8px var(--green);display:flex;align-items:center;justify-content:center;gap:.5rem}
+.slot-header::before,.slot-header::after{content:'//';opacity:.4;font-size:.45rem}
+.slot-window{height:var(--win-h);overflow:hidden;position:relative}
+.slot-window::before,.slot-window::after{content:'';position:absolute;left:0;right:0;height:80px;z-index:5;pointer-events:none}
+.slot-window::before{top:0;background:linear-gradient(to bottom,var(--surface) 5%,transparent)}
+.slot-window::after{bottom:0;background:linear-gradient(to top,var(--surface) 5%,transparent)}
+.slot-reel{display:flex;flex-direction:column;will-change:transform}
+.slot-item{height:var(--scan-h);display:flex;align-items:center;justify-content:center;padding:0 .6rem;text-align:center;font-size:.62rem;line-height:1.25;color:var(--muted);flex-shrink:0;letter-spacing:.03em;transition:color .15s,text-shadow .15s}
+.slot-item.active{color:var(--green);text-shadow:0 0 12px var(--green),0 0 24px var(--green3);font-weight:700}
+.slot-item.year-item{font-family:'Orbitron',sans-serif;font-size:1.7rem;font-weight:700;letter-spacing:.05em}
+
+/* RESULT */
+.result-panel{padding:1.5rem;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr auto;gap:1.5rem;align-items:center;min-height:110px;opacity:0;transform:translateY(6px);transition:opacity .5s,transform .5s;background:var(--deep);position:relative}
+.result-panel::before{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent);opacity:.3}
+.result-panel.visible{opacity:1;transform:translateY(0)}
+.result-track-label{font-size:.5rem;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;margin-bottom:.4rem;display:flex;align-items:center;gap:.5rem}
+.result-track-label::before{content:'▶';color:var(--green);text-shadow:0 0 6px var(--green);font-size:.55rem;animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.result-song-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.1rem,3.5vw,1.9rem);font-weight:700;line-height:1.1;color:var(--white);text-shadow:0 0 20px rgba(191,128,255,.3);margin-bottom:.5rem;letter-spacing:.02em}
+.result-meta{font-size:.6rem;color:var(--dim);letter-spacing:.1em;line-height:1.8}
+.result-meta .hi{color:var(--green);text-shadow:0 0 6px var(--green3)}
+
+/* QR CODE CLICKABLE WRAPPER */
+.qr-link{text-decoration:none;display:block;cursor:pointer;transition:transform 0.2s}
+.qr-link:hover{transform:scale(1.03)}
+.qr-wrap{display:flex;flex-direction:column;align-items:center;gap:.4rem;flex-shrink:0}
+.qr-frame{padding:6px;background:var(--white);border:1px solid var(--green);box-shadow:0 0 15px rgba(191,128,255,.2);transition:box-shadow .2s}
+.qr-link:hover .qr-frame{box-shadow:0 0 20px rgba(191,128,255,.6),0 0 40px rgba(191,128,255,.2)}
+.qr-frame canvas,.qr-frame img{display:block}
+.qr-label{font-size:.45rem;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;text-align:center;transition:color .2s}
+.qr-link:hover .qr-label{color:var(--green);text-shadow:0 0 6px var(--green)}
+
+/* VERDICT BUTTONS */
+.verdict-row{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.8rem;align-items:center;background:var(--deep);opacity:0;pointer-events:none;transition:opacity .4s .3s}
+.verdict-row.visible{opacity:1;pointer-events:all}
+.verdict-btn{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.7rem;letter-spacing:.18em;background:transparent;border:1px solid;padding:.65rem 1.5rem;cursor:crosshair;text-transform:uppercase;position:relative;overflow:hidden;transition:color .2s,box-shadow .2s;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);flex:1}
+.verdict-btn::before{content:'';position:absolute;inset:0;transform:scaleX(0);transform-origin:left;transition:transform .2s;z-index:-1}
+.verdict-btn:disabled{opacity:.35;cursor:not-allowed}
+.verdict-btn:disabled::before{display:none}
+.accept-btn{color:var(--accept);border-color:var(--accept);box-shadow:0 0 12px rgba(0,255,136,.12)}
+.accept-btn::before{background:var(--accept)}
+.accept-btn:hover:not(:disabled){color:#000;box-shadow:var(--accept-glow)}.accept-btn:hover:not(:disabled)::before{transform:scaleX(1)}
+.deny-btn{color:var(--deny);border-color:var(--deny);box-shadow:0 0 12px rgba(255,51,102,.12)}
+.deny-btn::before{background:var(--deny)}
+.deny-btn:hover:not(:disabled){color:#fff;box-shadow:var(--deny-glow)}.deny-btn:hover:not(:disabled)::before{transform:scaleX(1)}
+.vote-counts{display:flex;gap:1.2rem;font-size:.55rem;letter-spacing:.15em;color:var(--dim);flex-shrink:0}
+.vote-accept{color:var(--accept);text-shadow:0 0 6px rgba(0,255,136,.4)}
+.vote-deny{color:var(--deny);text-shadow:0 0 6px rgba(255,51,102,.4)}
+
+/* CONTROLS */
+.controls{padding:1.2rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:1rem;align-items:center;background:var(--deep)}
+.spin-btn{font-family:'Orbitron',sans-serif;font-weight:700;font-size:.75rem;letter-spacing:.2em;background:transparent;color:var(--green);border:1px solid var(--green);padding:.75rem 2rem;cursor:crosshair;text-transform:uppercase;position:relative;overflow:hidden;transition:color .2s,box-shadow .2s;box-shadow:0 0 12px rgba(191,128,255,.15);clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);flex-shrink:0}
+.spin-btn::before{content:'';position:absolute;inset:0;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform .2s;z-index:-1}
+.spin-btn:hover{color:var(--black);box-shadow:var(--glow-strong)}.spin-btn:hover::before{transform:scaleX(1)}
+.spin-btn:disabled{color:var(--muted);border-color:var(--muted);cursor:not-allowed;box-shadow:none}.spin-btn:disabled::before{display:none}
+.ctrl-info{font-size:.5rem;letter-spacing:.2em;color:var(--dim)}.ctrl-info span{color:var(--green)}
+
+/* HISTORY */
+.history-section{margin-top:1.5rem;border:1px solid var(--border);background:var(--surface);position:relative;overflow:hidden}
+.history-section::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green2),transparent);opacity:.4}
+.history-head{padding:.65rem 1.2rem;border-bottom:1px solid var(--border);font-size:.5rem;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;background:var(--deep);display:flex;justify-content:space-between}
+.history-head span{color:var(--green)}
+.history-item{display:flex;align-items:center;gap:1rem;padding:.6rem 1.2rem;border-bottom:1px solid var(--border);font-size:.6rem;color:var(--muted);transition:background .15s}
+.history-item:last-child{border-bottom:none}.history-item:first-child{color:var(--text);background:rgba(191,128,255,.03)}.history-item:hover{background:rgba(191,128,255,.04)}
+.h-idx{font-family:'Orbitron',sans-serif;font-size:.65rem;color:var(--border);width:24px;flex-shrink:0}
+.history-item:first-child .h-idx{color:var(--green);text-shadow:0 0 6px var(--green)}
+.h-song{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.h-info{flex-shrink:0;color:var(--dim);font-size:.55rem;letter-spacing:.1em}
+.h-verdict{flex-shrink:0;font-size:.55rem;letter-spacing:.12em;font-family:'Orbitron',sans-serif;font-weight:700}
+.h-verdict.accepted{color:var(--accept);text-shadow:0 0 6px rgba(0,255,136,.4)}
+.h-verdict.denied{color:var(--deny);text-shadow:0 0 6px rgba(255,51,102,.4)}
+.h-verdict.pending{color:var(--muted)}
+footer{text-align:center;padding:2rem 0 0;font-size:.5rem;letter-spacing:.3em;color:var(--border)}
+</style>
+
+</head>
+<body>
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+<div class="page">
+  <header>
+    <div class="header-bar">
+      <div class="brand">
+        <div class="brand-label">EST. MMXXV · MUSIC SYSTEM</div>
+        <div class="logo glitch" data-text="MUSIC MAN BY ZZZ">MUSIC MAN BY ZZZ</div>
+        <div class="logo-sub">TRIPLE Z // RANDOMIZER v2.0</div>
+      </div>
+      <div class="header-status">
+        <div class="status-live">SYSTEM ONLINE</div>
+        <div>CATALOG: <span style="color:var(--green)">138</span> TRACKS</div>
+        <div>SPINS: <span style="color:var(--green)" id="spinCounter">000</span></div>
+      </div>
+    </div>
+  </header>
+  <div class="cyber-divider"><div class="divider-diamond"></div></div>
+
+  <div class="machine" id="machine">
+    <div class="machine-header">
+      <div class="mh-left"><span>◆</span> SLOT_MATRIX.EXE <span id="statusText">READY</span></div>
+      <div class="mh-right"><span>ARTIST</span><span>//</span><span>SONG</span><span>//</span><span>YEAR</span></div>
+    </div>
+    <div class="slots-grid">
+      <div class="slots-highlight"></div>
+      <div class="slot-col">
+        <div class="slot-header">Artist</div>
+        <div class="slot-window"><div class="slot-reel" id="reel-artist"></div></div>
+      </div>
+      <div class="slot-col">
+        <div class="slot-header">Song</div>
+        <div class="slot-window"><div class="slot-reel" id="reel-song"></div></div>
+      </div>
+      <div class="slot-col">
+        <div class="slot-header">Year</div>
+        <div class="slot-window"><div class="slot-reel" id="reel-year"></div></div>
+      </div>
+    </div>
+    <div class="result-panel" id="resultPanel">
+      <div>
+        <div class="result-track-label">NOW PLAYING</div>
+        <div class="result-song-title" id="songTitle">—</div>
+        <div class="result-meta" id="songMeta"></div>
+      </div>
+      <a href="#" target="_blank" id="qrAnchor" class="qr-link" style="display:none">
+        <div class="qr-wrap" id="qrWrap">
+          <div class="qr-frame" id="qr-container"></div>
+          <div class="qr-label">click / scan → link</div>
+        </div>
+      </a>
+    </div>
+    <div class="verdict-row" id="verdictRow">
+      <button class="verdict-btn accept-btn" id="acceptBtn" onclick="castVerdict('accept')">✔ ACCEPT</button>
+      <button class="verdict-btn deny-btn" id="denyBtn" onclick="castVerdict('deny')">✖ DENY</button>
+      <div class="vote-counts" id="voteCounts" style="display:none">
+        <span class="vote-accept" id="voteAcceptDisplay"></span>
+        <span class="vote-deny" id="voteDenyDisplay"></span>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="spin-btn" id="spinBtn" onclick="spinAll()">▶ EXECUTE SPIN</button>
+      <div class="ctrl-info">MASSIVE GEN Z HITS · <span>138 TRACKS</span></div>
+    </div>
+  </div>
+
+  <div class="history-section" id="historySection" style="display:none">
+    <div class="history-head"><span>// SPIN LOG</span><span id="histCount">0 ENTRIES</span></div>
+    <div class="history-list" id="historyList"></div>
+  </div>
+  <footer>MUSIC MAN BY ZZZ · ALL RIGHTS RESERVED · ZZZ©2025</footer>
+</div>
+
+<script>
+const ITEM_H=64, WIN_H=256, PAD=2;
+
+const catalog = [
+  {artist:"Drake",song:"NOKIA",year:"2023",vid:"RDH71p3LgWM"},
+  {artist:"Drake",song:"Rich Baby Daddy",year:"2023",vid:"ptSLcQKpfQ8"},
+  {artist:"Drake",song:"One Dance",year:"2016",vid:"ki0Ocze98U8"},
+  {artist:"Drake",song:"Passionfruit",year:"2017",vid:"EgfsXTOn_pI"},
+  {artist:"Drake",song:"Jimmy Cooks",year:"2022",vid:"V7UgPHjN9qE"},
+  {artist:"Drake",song:"First Person Shooter",year:"2023",vid:"Xty2gi5cMa8"},
+  {artist:"Drake",song:"IDGAF",year:"2023",vid:"fCRCLsJQWUQ"},
+  {artist:"Sabrina Carpenter",song:"Espresso",year:"2024",vid:"eVli-tstM5E"},
+  {artist:"Sabrina Carpenter",song:"Please Please Please",year:"2024",vid:"cF1Na4AIecM"},
+  {artist:"Benson Boone",song:"Beautiful Things",year:"2024",vid:"Oa_RSwwpPaA"},
+  {artist:"Billie Eilish",song:"BIRDS OF A FEATHER",year:"2024",vid:"V9PVRfjEBTI"},
+  {artist:"Tate McRae",song:"greedy",year:"2023",vid:"To4SWGZkEPk"},
+  {artist:"Teddy Swims",song:"Lose Control",year:"2023",vid:"9gWIIIr2Asw"},
+  {artist:"Hozier",song:"Too Sweet",year:"2024",vid:"NTpbbQUBbuo"},
+  {artist:"Tommy Richman",song:"MILLION DOLLAR BABY",year:"2024",vid:"zG5YzRxOcsI"},
+  {artist:"Chappell Roan",song:"Good Luck, Babe!",year:"2024",vid:"1RKqOmSkGgM"},
+  {artist:"SZA",song:"Saturn",year:"2024",vid:"eYalXJvJ2Mg"},
+  {artist:"Ariana Grande",song:"we can't be friends",year:"2024",vid:"93wljcn6piQ"},
+  {artist:"Post Malone",song:"I Had Some Help",year:"2024",vid:"4QIZE708gJ4"},
+  {artist:"Taylor Swift",song:"Cruel Summer",year:"2019",vid:"ic8j13piAhQ"},
+  {artist:"The Weeknd",song:"Blinding Lights",year:"2019",vid:"4NRXx6U8ABQ"},
+  {artist:"SZA",song:"Snooze",year:"2022",vid:"LDY_XyxBu8A"},
+  {artist:"Harry Styles",song:"As It Was",year:"2022",vid:"H5v3kku4y6Q"},
+  {artist:"The Kid LAROI",song:"STAY",year:"2021",vid:"kTJczUoc26U"},
+  {artist:"Dua Lipa",song:"Levitating",year:"2020",vid:"TUVcZfQe-Kw"},
+  {artist:"Drake",song:"In My Feelings",year:"2018",vid:"SD1tkI5-3dI"},
+  {artist:"Drake",song:"God's Plan",year:"2018",vid:"m1a_GqJf02M"},
+  {artist:"Drake",song:"Hotline Bling",year:"2015",vid:"uxpDa-c-4Mc"},
+  {artist:"Sabrina Carpenter",song:"Please Please Please (Alt)",year:"2024",vid:"cF1Na4AIecM"},
+  {artist:"Sabrina Carpenter",song:"Taste",year:"2024",vid:"z9Q9OzL_wI8"},
+  {artist:"Billie Eilish",song:"What Was I Made For?",year:"2023",vid:"cW8VLC9nnTo"},
+  {artist:"Tate McRae",song:"Sports car",year:"2023",vid:"7InTkBxPtK4"},
+  {artist:"Chappell Roan",song:"Pink Pony Club",year:"2023",vid:"GR3Liudev18"},
+  {artist:"Ariana Grande",song:"we can't be friends (lyric)",year:"2024",vid:"UdRAXWNvjzE"},
+  {artist:"Ariana Grande",song:"yes, and?",year:"2024",vid:"eB6txyhHFG4"},
+  {artist:"SZA",song:"Kill Bill",year:"2022",vid:"MSRcC626prw"},
+  {artist:"Post Malone",song:"Sunflower",year:"2018",vid:"ApXoWvfEYVU"},
+  {artist:"Post Malone",song:"Circles",year:"2019",vid:"wXhTHyIgQ_U"},
+  {artist:"The Weeknd",song:"Save Your Tears",year:"2020",vid:"XXYlFuWEuKI"},
+  {artist:"The Weeknd",song:"Starboy",year:"2016",vid:"34Na4j8AVgA"},
+  {artist:"Drake",song:"Push Ups",year:"2024",vid:"HKH9p19PRLA"},
+  {artist:"The Weeknd",song:"Timeless",year:"2024",vid:"rVORdn4Xpzk"},
+  {artist:"The Weeknd",song:"Can't Feel My Face",year:"2015",vid:"KEI4qSrkPAs"},
+  {artist:"The Weeknd",song:"Call Out My Name",year:"2018",vid:"M4ZoCHID9GI"},
+  {artist:"Harry Styles",song:"Watermelon Sugar",year:"2019",vid:"E07s5ZYygMg"},
+  {artist:"Dua Lipa",song:"Dance The Night",year:"2023",vid:"771ztouNg08"},
+  {artist:"The Kid LAROI",song:"STAY (Alt)",year:"2021",vid:"kTJczUoc26U"},
+  {artist:"Justin Bieber",song:"Ghost",year:"2021",vid:"Fp8msa5uYsc"},
+  {artist:"Justin Bieber",song:"Peaches",year:"2021",vid:"tQ0yjYUFKAE"},
+  {artist:"Taylor Swift",song:"Anti-Hero",year:"2022",vid:"gGwN25z7FrE"},
+  {artist:"Taylor Swift",song:"Shake It Off",year:"2014",vid:"nfWlot6h_JM"},
+  {artist:"Travis Scott",song:"goosebumps",year:"2016",vid:"Dst9gZkq1a8"},
+  {artist:"Travis Scott",song:"SICKO MODE",year:"2018",vid:"6ONRf7h3Mdk"},
+  {artist:"Travis Scott",song:"FE!N",year:"2023",vid:"B9synWjqBn8"},
+  {artist:"Juice WRLD",song:"Lucid Dreams",year:"2018",vid:"mzB1VGEGcSU"},
+  {artist:"Juice WRLD",song:"Robbery",year:"2019",vid:"iI34LYmJ1Fs"},
+  {artist:"Juice WRLD",song:"All Girls Are The Same",year:"2018",vid:"h3EJICKwITw"},
+  {artist:"Lil Uzi Vert",song:"XO Tour Llif3",year:"2017",vid:"WrsFXgQk5UI"},
+  {artist:"Lil Uzi Vert",song:"Just Wanna Rock",year:"2022",vid:"hqunRm_dSHw"},
+  {artist:"Roddy Ricch",song:"The Box",year:"2019",vid:"UNZqm3dxd2w"},
+  {artist:"DaBaby",song:"Rockstar",year:"2020",vid:"mxFstYSbBmc"},
+  {artist:"Jack Harlow",song:"First Class",year:"2022",vid:"HmP_wGYw1_g"},
+  {artist:"Jack Harlow",song:"Lovin On Me",year:"2023",vid:"Iq8h3GEe22o"},
+  {artist:"Jack Harlow",song:"WHATS POPPIN",year:"2020",vid:"HIwAI05Y1fU"},
+  {artist:"DaBaby",song:"Suge",year:"2019",vid:"KvuQNNVrbtM"},
+  {artist:"Steve Lacy",song:"Bad Habit",year:"2022",vid:"S2PVsv2K1Bg"},
+  {artist:"Steve Lacy",song:"Dark Red",year:"2017",vid:"xRzbLQ_WKPs"},
+  {artist:"Khalid",song:"Location",year:"2016",vid:"by3yRdlQvzs"},
+  {artist:"Khalid",song:"Better",year:"2019",vid:"x3bfa3DZ8JM"},
+  {artist:"Glass Animals",song:"Heat Waves",year:"2020",vid:"mRD0-GxqHVo"},
+  {artist:"The Neighbourhood",song:"Sweater Weather",year:"2012",vid:"GCdwKhTtNNw"},
+  {artist:"Arctic Monkeys",song:"505",year:"2007",vid:"MrmPDUvKyLs"},
+  {artist:"Arctic Monkeys",song:"Do I Wanna Know?",year:"2013",vid:"bpOSxM0rNPM"},
+  {artist:"Tyler, The Creator",song:"See You Again",year:"2017",vid:"eYBw6Cl4ico"},
+  {artist:"Tyler, The Creator",song:"EARFQUAKE",year:"2019",vid:"HmAsUQEFYGI"},
+  {artist:"Future",song:"Mask Off",year:"2017",vid:"xvZqHgFz51I"},
+  {artist:"Future",song:"WAIT FOR U",year:"2022",vid:"rP09GUQFDFk"},
+  {artist:"Future",song:"Life Is Good",year:"2020",vid:"l0U7SxXHkPY"},
+  {artist:"Carly Rae Jepsen",song:"Call Me Maybe",year:"2011",vid:"fWNaR-rxAic"},
+  {artist:"24kGoldn",song:"Mood",year:"2020",vid:"GrAchTdepsU"},
+  {artist:"The Chainsmokers",song:"Closer",year:"2016",vid:"PT2_F-1esPk"},
+  {artist:"Lewis Capaldi",song:"Someone You Loved",year:"2018",vid:"zABLecsR5UE"},
+  {artist:"The Weeknd",song:"Die For You",year:"2016",vid:"uPD0QOGTmMI"},
+  {artist:"The Weeknd",song:"Die For You (Remix)",year:"2023",vid:"YQ-qToZUybM"},
+  {artist:"Lady Gaga",song:"Die With A Smile",year:"2024",vid:"kPa7bsKwL-c"},
+  {artist:"Silk Sonic",song:"Leave the Door Open",year:"2021",vid:"adLGHcj_fmA"},
+  {artist:"Bruno Mars",song:"Locked Out Of Heaven",year:"2012",vid:"e-fA-gBCkj0"},
+  {artist:"Bruno Mars",song:"That's What I Like",year:"2016",vid:"PMivT7MJ41M"},
+  {artist:"BØRNS",song:"Electric Love",year:"2015",vid:"RYr96YYEaZY"},
+  {artist:"Vance Joy",song:"Riptide",year:"2013",vid:"lYoWuaw5nSk"},
+  {artist:"The 1975",song:"Somebody Else",year:"2016",vid:"Bimd2nZirT4"},
+  {artist:"JVKE",song:"golden hour",year:"2022",vid:"1axwxop5kp0"},
+  {artist:"Billie Eilish",song:"ocean eyes",year:"2016",vid:"viimfQi_pUw"},
+  {artist:"One Direction",song:"Night Changes",year:"2014",vid:"syFZfO_wfMQ"},
+  {artist:"One Direction",song:"Story of My Life",year:"2013",vid:"W-TE_Ys4iwM"},
+  {artist:"One Direction",song:"What Makes You Beautiful",year:"2011",vid:"QJO3ROT-A4E"},
+  {artist:"Ella Langley",song:"Dandelion",year:"2024",vid:"sf6eRmInk1s"},
+  {artist:"The Killers",song:"Mr. Brightside",year:"2003",vid:"gGdGFtwCNBE"},
+  {artist:"Hozier",song:"Take Me To Church",year:"2013",vid:"MYSVMgRr6pw"},
+  {artist:"Khalid",song:"Young Dumb & Broke",year:"2017",vid:"IPfJnp1guPc"},
+  {artist:"Frank Ocean",song:"Pink + White",year:"2016",vid:"uzS3WG6__G4"},
+  {artist:"Frank Ocean",song:"Thinkin Bout You",year:"2012",vid:"6JHu3b-pbh8"},
+  {artist:"Kendrick Lamar",song:"HUMBLE.",year:"2017",vid:"ov4WobPqoSA"},
+  {artist:"Kendrick Lamar",song:"Money Trees",year:"2012",vid:"smqhSl0u_sI"},
+  {artist:"Elliott Smith",song:"Say Yes",year:"1997",vid:"8bxmk09lCzk"},
+  {artist:"Silk Sonic",song:"After Last Night",year:"2021",vid:"-cy_tDQPXHk"},
+  {artist:"Thundercat",song:"Funny Thing",year:"2020",vid:"XwPB9FrhqjI"},
+  {artist:"Thundercat",song:"Them Changes",year:"2017",vid:"GNCd_ERZvZM"},
+  {artist:"Kendrick Lamar",song:"Wesley's Theory",year:"2015",vid:"l9fN-8NjrvI"},
+  {artist:"Justin Bieber",song:"YUKON",year:"2025",vid:"PNpsJ--XGOo"},
+  {artist:"Justin Bieber",song:"DAISIES",year:"2025",vid:"msGuqelopMA"},
+  {artist:"Justin Bieber",song:"Beauty And A Beat",year:"2012",vid:"Ys7-6_t7OEQ"},
+  {artist:"Justin Bieber",song:"Baby",year:"2010",vid:"kffacxfA7G4"},
+  {artist:"DJ Khaled",song:"I'm The One",year:"2017",vid:"weeI1G46q0o"},
+  {artist:"Justin Bieber",song:"Sorry",year:"2015",vid:"fRh_vgS2dFE"},
+  {artist:"Justin Bieber",song:"What Do You Mean?",year:"2015",vid:"DK_0jXPuIr0"},
+  {artist:"blink-182",song:"All The Small Things",year:"1999",vid:"9Ht5RZpzPqw"},
+  {artist:"blink-182",song:"I Miss You",year:"2003",vid:"s1tAYmMjLdY"},
+  {artist:"blink-182",song:"What's My Age Again?",year:"1999",vid:"K7l5ZeVVoCA"},
+  {artist:"blink-182",song:"Adam's Song",year:"1999",vid:"2MRdtXWcgIw"},
+  {artist:"blink-182",song:"Dammit",year:"1997",vid:"sT0g16_LQaQ"},
+  {artist:"Tally Hall",song:"Hidden in the Sand",year:"2011",vid:"EOFA9kPQ_uU"},
+  {artist:"Tally Hall",song:"Ruler of Everything",year:"2005",vid:"I8sUC-dsW8A"},
+  {artist:"Tally Hall",song:"Turn The Lights Off",year:"2011",vid:"dLrdSC9MVb4"},
+  {artist:"Tally Hall",song:"The Bidding",year:"2005",vid:"ipYafcHd0jA"},
+  {artist:"Lucki",song:"Randomly",year:"2019",vid:"KeHKJCt4qJA"},
+  {artist:"Lucki",song:"RIP",year:"2024",vid:"rSO1cBfPVQg"},
+  {artist:"Lucki",song:"Heavy On My Heart",year:"2024",vid:"wTa4Kee3zA8"},
+  {artist:"Lucki",song:"13",year:"2022",vid:"Yq_qdfajtNI"},
+  {artist:"aespa",song:"WDA",year:"2026",vid:"iTJSbJtS8MU"},
+  {artist:"aespa",song:"Whiplash",year:"2024",vid:"jWQx2f-CErU"},
+  {artist:"aespa",song:"Armageddon",year:"2024",vid:"nFYwcndNuOY"},
+  {artist:"aespa",song:"Supernova",year:"2024",vid:"phuiiNCxRMg"},
+  {artist:"CORTIS",song:"GO!",year:"2025",vid:"WXS-o57VJ5w"},
+  {artist:"CORTIS",song:"FaSHioN (Dance Cover)",year:"2025",vid:"3GdAKA0ob9k"},
+  {artist:"Kendrick Lamar",song:"All The Stars",year:"2018",vid:"JQbjS0_ZfJ0"},
+  {artist:"Hearts2Hearts",song:"RUDE!",year:"2026",vid:"F7sGJVUrkjQ"},
+  {artist:"SZA",song:"Love Galore",year:"2017",vid:"hHXfCOjb3fk"},
+];
+
+const voteTally = {};
+function tallyKey(track) { return track.artist + '||' + track.song; }
+function getVotes(track) {
+  const k = tallyKey(track);
+  if (!voteTally[k]) voteTally[k] = { accept: 0, deny: 0 };
+  return voteTally[k];
+}
+
+function buildReel(id, items, isYear) {
+  const reel = document.getElementById(id);
+  reel.innerHTML = '';
+  const mk = txt => {
+    const el = document.createElement('div');
+    el.className = 'slot-item' + (isYear ? ' year-item' : '');
+    el.textContent = txt;
+    reel.appendChild(el);
+  };
+  for (let i = 0; i < PAD; i++) mk(items[(items.length - PAD + i) % items.length]);
+  items.forEach(mk);
+  for (let i = 0; i < PAD; i++) mk(items[i % items.length]);
+}
+
+function setPos(id, idx) {
+  const reel = document.getElementById(id);
+  const offset = idx * ITEM_H - (WIN_H / 2 - ITEM_H / 2) + PAD * ITEM_H;
+  reel.style.transform = `translateY(${-offset}px)`;
+  reel.querySelectorAll('.slot-item')[idx + PAD]?.classList.add('active');
+}
+
+function initReels() {
+  const artists = [...new Set(catalog.map(t => t.artist))];
+  const songs   = catalog.map(t => t.song);
+  const years   = [...new Set(catalog.map(t => t.year))].sort();
+  buildReel('reel-artist', artists, false);
+  buildReel('reel-song',   songs,   false);
+  buildReel('reel-year',   years,   true);
+  setPos('reel-artist', Math.floor(artists.length / 2));
+  setPos('reel-song',   Math.floor(songs.length / 2));
+  setPos('reel-year',   Math.floor(years.length / 2));
+}
+
+function easeOutQuart(t) { return 1 - Math.pow(1 - t, 4); }
+
+function animateReel(reelId, items, targetIdx, delay) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const reel = document.getElementById(reelId);
+      const total = items.length;
+      const centeredOffset = targetIdx * ITEM_H - (WIN_H / 2 - ITEM_H / 2) + PAD * ITEM_H;
+      const totalDist = (4 + Math.floor(Math.random() * 3)) * total * ITEM_H + centeredOffset;
+      const duration = 1600 + delay * 280 + Math.random() * 300;
+      let start = null;
+      function step(ts) {
+        if (!start) start = ts;
+        const p = Math.min((ts - start) / duration, 1);
+        const pos = easeOutQuart(p) * totalDist;
+        const cycled = pos % (total * ITEM_H);
+        reel.style.transform = `translateY(${-(cycled + PAD * ITEM_H - (WIN_H / 2 - ITEM_H / 2))}px)`;
+        const cIdx = Math.round(cycled / ITEM_H) % total;
+        reel.querySelectorAll('.slot-item').forEach((el, i) => el.classList.toggle('active', i === cIdx + PAD));
+        if (p < 1) { requestAnimationFrame(step); }
+        else {
+          reel.style.transform = `translateY(${-centeredOffset}px)`;
+          reel.querySelectorAll('.slot-item').forEach((el, i) => el.classList.toggle('active', i === targetIdx + PAD));
+          resolve();
+        }
+      }
+      requestAnimationFrame(step);
+    }, delay * 60);
+  });
+}
+
+let isSpinning = false, spinHistory = [], spinCount = 0;
+let currentTrack = null, verdictCast = false;
+
+async function spinAll() {
+  if (isSpinning) return;
+  isSpinning = true;
+  verdictCast = false;
+  currentTrack = null;
+
+  const btn = document.getElementById('spinBtn');
+  const machine = document.getElementById('machine');
+  btn.disabled = true;
+  btn.textContent = '⟳ PROCESSING...';
+  document.getElementById('statusText').textContent = 'SPINNING';
+  machine.classList.add('spinning');
+  document.getElementById('resultPanel').classList.remove('visible');
+  document.getElementById('verdictRow').classList.remove('visible');
+  document.getElementById('qrAnchor').style.display = 'none';
+  document.getElementById('qr-container').innerHTML = '';
+  document.getElementById('voteCounts').style.display = 'none';
+
+  const pick = catalog[Math.floor(Math.random() * catalog.length)];
+  currentTrack = pick;
+
+  const artists = [...new Set(catalog.map(t => t.artist))];
+  const songs   = catalog.map(t => t.song);
+  const years   = [...new Set(catalog.map(t => t.year))].sort();
+
+  const aIdx = artists.indexOf(pick.artist);
+  const sIdx = songs.indexOf(pick.song);
+  const yIdx = years.indexOf(pick.year);
+
+  await Promise.all([
+    animateReel('reel-artist', artists, aIdx, 0),
+    animateReel('reel-song',   songs,   sIdx, 1),
+    animateReel('reel-year',   years,   yIdx, 2)
+  ]);
+
+  machine.classList.remove('spinning');
+  document.getElementById('statusText').textContent = 'HALTED';
+
+  // Update track panel fields
+  document.getElementById('songTitle').textContent = pick.song;
+  document.getElementById('songMeta').innerHTML = `ARTIST: <span class="hi">${pick.artist}</span> // YEAR: <span class="hi">${pick.year}</span>`;
+
+  // Dynamic QR Destination generation and Anchor handling
+  const targetUrl = `https://www.youtube.com/watch?v=${pick.vid}`;
+  const anchor = document.getElementById('qrAnchor');
+  anchor.href = targetUrl;
+  anchor.style.display = 'block';
+
+  new QRCode(document.getElementById('qr-container'), {
+    text: targetUrl,
+    width: 64,
+    height: 64,
+    colorDark: "#000000",
+    colorLight: "#ffffff"
+  });
+
+  document.getElementById('resultPanel').classList.add('visible');
+  document.getElementById('verdictRow').classList.add('visible');
+
+  spinCount++;
+  document.getElementById('spinCounter').textContent = String(spinCount).padStart(3, '0');
+
+  btn.disabled = false;
+  btn.textContent = '▶ EXECUTE SPIN';
+  isSpinning = false;
+}
+
+function castVerdict(type) {
+  if (!currentTrack || verdictCast) return;
+  verdictCast = true;
+
+  const votes = getVotes(currentTrack);
+  votes[type]++;
+
+  document.getElementById('voteAcceptDisplay').textContent = `✔ ${votes.accept}`;
+  document.getElementById('voteDenyDisplay').textContent = `✖ ${votes.deny}`;
+  document.getElementById('voteCounts').style.display = 'flex';
+
+  // Push into local logging arrays
+  spinHistory.unshift({
+    track: currentTrack,
+    verdict: type === 'accept' ? 'ACCEPTED' : 'DENIED'
+  });
+
+  updateHistoryUI();
+}
+
+function updateHistoryUI() {
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  document.getElementById('histCount').textContent = `${spinHistory.length} ENTRIES`;
+  
+  list.innerHTML = '';
+  spinHistory.forEach((item, index) => {
+    const el = document.createElement('div');
+    el.className = 'history-item';
+    el.innerHTML = `
+      <div class="h-idx">#${String(spinHistory.length - index).padStart(2, '0')}</div>
+      <div class="h-song">${item.track.song} — ${item.track.artist}</div>
+      <div class="h-info">${item.track.year}</div>
+      <div class="h-verdict ${item.verdict.toLowerCase()}">${item.verdict}</div>
+    `;
+    list.appendChild(el);
+  });
+  section.style.display = 'block';
+}
+
+window.onload = initReels;
+</script>
+</body>
+</html>
